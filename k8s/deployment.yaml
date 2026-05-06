@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: shopflow-lite
+  labels:
+    app: shopflow-lite
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: shopflow-lite
@@ -12,31 +14,43 @@ spec:
       labels:
         app: shopflow-lite
     spec:
+      imagePullSecrets:
+      - name: dockerhub-pull-secret
       containers:
       - name: shopflow-lite
-        image: your-registry.com/shopflow-lite:latest
+        image: docker.io/namanshah30/shopflow-lite:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
         env:
         - name: SUPABASE_URL
           valueFrom:
             secretKeyRef:
-              name: shopflow-secret
-              key: SUPABASE_URL
+              name: supabase-secret
+              key: url
         - name: SUPABASE_KEY
           valueFrom:
             secretKeyRef:
-              name: shopflow-secret
-              key: SUPABASE_KEY
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 5000
-          initialDelaySeconds: 30
-          periodSeconds: 10
+              name: supabase-secret
+              key: key
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
         readinessProbe:
           httpGet:
             path: /health
             port: 5000
-          initialDelaySeconds: 5
+          initialDelaySeconds: 10
           periodSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          failureThreshold: 3
