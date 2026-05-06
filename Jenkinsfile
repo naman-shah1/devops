@@ -41,29 +41,19 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Code') {
-            steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/main']],
-                    extensions: [[
-                        $class: 'CheckoutOption',
-                        timeout: 20
-                    ], [
-                        $class: 'CloneOption',
-                        timeout: 20,
-                        noTags: true,
-                        reference: '',
-                        shallow: true,
-                        depth: 1
-                    ]],
-                    userRemoteConfigs: [[
-                        url: 'https://github.com/RishitKothari12/Shopflow-Lite.git'
-                    ]]
-                ])
-            }
-        }
-
+      stage('Checkout Code') {
+    steps {
+        checkout([
+            $class: 'GitSCM',
+            branches: [[name: '*/main']],  // change to */master if needed
+            extensions: [],
+            userRemoteConfigs: [[
+                url: 'https://github.com/naman-shah1/devops.git',
+                // add credentialsId: 'github-credentials' if repo is private
+            ]]
+        ])
+    }
+}
         stage('Setup Python Environment') {
             steps {
                 container('python') {
