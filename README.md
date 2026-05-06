@@ -16,8 +16,7 @@ A modern, DevOps-powered e-commerce storefront built with Flask, Supabase, and K
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/RishitKothari12/Shopflow-Lite.git
-   cd Shopflow-Lite
+   https://github.com/naman-shah1/devops
    ```
 
 2. **Set up Python environment**
