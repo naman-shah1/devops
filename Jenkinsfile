@@ -50,7 +50,7 @@ pipeline {
         checkout scm
     }
 }
-}
+
         stage('Setup Python Environment') {
             steps {
                 container('python') {
