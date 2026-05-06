@@ -1,44 +1,50 @@
 pipeline {
     agent {
-    kubernetes {
-        yaml '''
-        apiVersion: v1
-        kind: Pod
-        spec:
-            serviceAccountName: jenkins-deployer
-            containers:
-            - name: jnlp
-              image: jenkins/inbound-agent:latest-jdk21
-              env:
-              - name: JENKINS_TUNNEL
-                value: "host.docker.internal:50000"
-            - name: docker
-              image: docker:dind
-              securityContext:
-                privileged: true
-              env:
-              - name: DOCKER_TLS_CERTDIR
-                value: /certs
-            - name: kubectl
-              image: bitnami/kubectl:latest
-              command:
-              - cat
-              tty: true
-            - name: python
-              image: python:3.9-slim
-              command:
-              - cat
-              tty: true
-        '''
+        kubernetes {
+            yaml '''
+            apiVersion: v1
+            kind: Pod
+            spec:
+                serviceAccountName: jenkins-deployer
+                containers:
+                - name: jnlp
+                  image: jenkins/inbound-agent:latest-jdk21
+                  env:
+                  - name: JENKINS_TUNNEL
+                    value: "host.docker.internal:50000"
+                - name: docker
+                  image: docker:latest
+                  command:
+                  - cat
+                  tty: true
+                  volumeMounts:
+                  - name: docker-sock
+                    mountPath: /var/run/docker.sock
+                - name: kubectl
+                  image: bitnami/kubectl:latest
+                  command:
+                  - cat
+                  tty: true
+                - name: python
+                  image: python:3.9-slim
+                  command:
+                  - cat
+                  tty: true
+                volumes:
+                - name: docker-sock
+                  hostPath:
+                    path: /var/run/docker.sock
+            '''
+        }
     }
-}
-   environment {
-    DOCKER_IMAGE = 'shopflow-lite'
-    DOCKER_TAG = "${env.BUILD_NUMBER}"
-    DOCKER_REGISTRY = 'docker.io/namanshah30'
-    SUPABASE_URL = credentials('supabase-url')
-    SUPABASE_KEY = credentials('supabase-key')
-}
+
+    environment {
+        DOCKER_IMAGE = 'shopflow-lite'
+        DOCKER_TAG = "${env.BUILD_NUMBER}"
+        DOCKER_REGISTRY = 'docker.io/namanshah30'
+        SUPABASE_URL = credentials('supabase-url')
+        SUPABASE_KEY = credentials('supabase-key')
+    }
 
     options {
         timeout(time: 30, unit: 'MINUTES')
@@ -47,11 +53,11 @@ pipeline {
     }
 
     stages {
-      stage('Checkout Code') {
-    steps {
-        checkout scm
-    }
-}
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
 
         stage('Setup Python Environment') {
             steps {
@@ -99,20 +105,19 @@ pipeline {
         }
 
         stage('Push Docker Image') {
-    steps {
-        container('docker') {
-            withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials',
-                             usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                sh '''
-                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}
-                docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest
-                '''
+            steps {
+                container('docker') {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials',
+                                     usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}
+                        docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest
+                        '''
+                    }
+                }
             }
         }
-    }
-        }
-
 
         stage('Deploy to Kubernetes') {
             steps {
@@ -161,16 +166,16 @@ pipeline {
         }
     }
 
-   post {
-    success {
-        echo '✅ Pipeline completed successfully!'
+    post {
+        success {
+            echo '✅ Pipeline completed successfully!'
+        }
+        failure {
+            echo '❌ Pipeline failed! Check the Debug on Failure stage above.'
+        }
+        always {
+            echo "📊 Build ${env.BUILD_NUMBER} completed"
+            echo "📝 Build URL: ${env.BUILD_URL}"
+        }
     }
-    failure {
-        echo '❌ Pipeline failed! Check the Debug on Failure stage above.'
-    }
-    always {
-        echo "📊 Build ${env.BUILD_NUMBER} completed"
-        echo "📝 Build URL: ${env.BUILD_URL}"
-    }
-}
 }
