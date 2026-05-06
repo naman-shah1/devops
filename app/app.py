@@ -224,9 +224,6 @@ def order_history():
     return render_template('orders.html', orders=orders)
 
 
-# ❤️ Health Check
-@app.route('/health')
-def health():
     return {"status": "running"}
 
 
