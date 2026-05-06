@@ -35,7 +35,7 @@ pipeline {
    environment {
     DOCKER_IMAGE = 'shopflow-lite'
     DOCKER_TAG = "${env.BUILD_NUMBER}"
-    DOCKER_REGISTRY = 'docker.io/NamanShah30'
+    DOCKER_REGISTRY = 'docker.io/namanshah30'
     SUPABASE_URL = credentials('supabase-url')
     SUPABASE_KEY = credentials('supabase-key')
 }
