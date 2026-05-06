@@ -162,24 +162,16 @@ pipeline {
         }
     }
 
-    post {
-        success {
-            echo '✅ Pipeline completed successfully!'
-            echo "🚀 ShopFlow Lite deployed at: http://your-k8s-service-url"
-        }
-        failure {
-            echo '❌ Pipeline failed!'
-            container('kubectl') {
-                sh '''
-                kubectl get pods -n default
-                kubectl describe deployment shopflow-lite -n default || true
-                kubectl logs -l app=shopflow-lite -n default --tail=50 || true
-                '''
-            }
-        }
-        always {
-            echo "📊 Build ${env.BUILD_NUMBER} completed"
-            echo "📝 Build URL: ${env.BUILD_URL}"
-        }
+   post {
+    success {
+        echo '✅ Pipeline completed successfully!'
     }
+    failure {
+        echo '❌ Pipeline failed! Check the Debug on Failure stage above.'
+    }
+    always {
+        echo "📊 Build ${env.BUILD_NUMBER} completed"
+        echo "📝 Build URL: ${env.BUILD_URL}"
+    }
+}
 }
