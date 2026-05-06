@@ -107,7 +107,10 @@ def _cart_line_items(cart):
 def home():
     return render_template('index.html')
 
-
+@app.route('/health')
+def health():
+    return {'status': 'ok'}, 200
+    
 # 🛍️ Products
 @app.route('/products')
 def show_products():
