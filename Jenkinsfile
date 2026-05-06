@@ -25,6 +25,8 @@ pipeline {
                   command:
                   - cat
                   tty: true
+                  securityContext:
+                    runAsUser: 0
                 - name: python
                   image: python:3.9-slim
                   command:
@@ -125,7 +127,6 @@ pipeline {
                     sh '''
                     echo 'Deploying ShopFlow Lite to Kubernetes...'
 
-                    # Update deployment with new image
                     sed -i "s|image:.*|image: ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}|g" k8s/deployment.yaml
 
                     kubectl apply -f k8s/deployment.yaml -n default
