@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ShopFlow Lite{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shopflow.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="/" class="brand" aria-label="ShopFlow Lite home">
+                <span class="brand-mark" aria-hidden="true">🛒</span>
+                <span>ShopFlow Lite</span>
+            </a>
+            <nav class="nav-links" aria-label="Main">
+                <a href="/" class="nav-link {% if request.path == '/' %}is-active{% endif %}">Home</a>
+                <a href="/products" class="nav-link {% if request.path == '/products' %}is-active{% endif %}">Products</a>
+                <a href="/orders" class="nav-link {% if request.path == '/orders' %}is-active{% endif %}">Orders</a>
+                {% if current_user %}
+                <span class="nav-link nav-user">Hi, {{ current_user.username }}</span>
+                <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="nav-link {% if request.path == '/login' %}is-active{% endif %}">Login</a>
+                <a href="{{ url_for('signin') }}" class="nav-link {% if request.path == '/signin' %}is-active{% endif %}">Sign in</a>
+                {% endif %}
+                <a href="/cart" class="nav-link nav-cart {% if request.path == '/cart' %}is-active{% endif %}">
+                    Cart
+                    {% block nav_cart_badge %}{% endblock %}
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main-wrap">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="site-footer">
+        ShopFlow Lite — demo e-commerce storefront
+    </footer>
+</body>
+</html>

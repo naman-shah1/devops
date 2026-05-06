@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Order history — ShopFlow Lite{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Order history</h1>
+<p class="page-sub">Orders you complete in this browser are listed here (demo — stored in your session).</p>
+
+{% if orders %}
+<div class="orders-list">
+    {% for order in orders %}
+    <article class="order-card" aria-labelledby="order-heading-{{ loop.index }}">
+        <div class="order-card-head">
+            <div>
+                <h2 class="order-card-title" id="order-heading-{{ loop.index }}">Order {{ order['id'][:8] }}</h2>
+                <p class="order-card-meta">{{ order['placed_at_label'] }} · {{ order['item_count'] }} {% if order['item_count'] == 1 %}item{% else %}items{% endif %}</p>
+            </div>
+            <div class="order-card-total">
+                <span class="order-card-total-label">Total</span>
+                <span class="order-card-total-value">₹{{ order['total'] }}</span>
+            </div>
+        </div>
+        <ul class="order-lines" role="list">
+            {% for line in order['items'] %}
+            <li class="order-line">
+                <div class="order-line-thumb">
+                    {% if line['image_url'] %}
+                    <img src="{{ line['image_url'] }}" alt="">
+                    {% else %}
+                    <span class="order-line-thumb-fallback" aria-hidden="true">📦</span>
+                    {% endif %}
+                </div>
+                <div class="order-line-body">
+                    <span class="order-line-name">{{ line['name'] }}</span>
+                    <span class="order-line-meta">₹{{ line['price'] }} × {{ line['quantity'] }} · <strong>₹{{ line['subtotal'] }}</strong></span>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state" role="status">
+    <p>You have not placed any orders yet. When you check out, your orders will appear here.</p>
+    <a href="/products" class="btn btn-primary">Browse products</a>
+</div>
+{% endif %}
+{% endblock %}

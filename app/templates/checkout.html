@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Order confirmed — ShopFlow Lite{% endblock %}
+
+{% block content %}
+<div class="checkout-success">
+    <div class="success-icon" aria-hidden="true">✓</div>
+    <h1>Order placed successfully</h1>
+    <p>Thank you for shopping with ShopFlow Lite. Your cart has been cleared — you can start a new order anytime.</p>
+    <div class="hero-actions">
+        <a href="/orders" class="btn btn-primary">View order history</a>
+        <a href="/products" class="btn btn-secondary">Shop again</a>
+        <a href="/" class="btn btn-ghost">Go home</a>
+    </div>
+</div>
+{% endblock %}
