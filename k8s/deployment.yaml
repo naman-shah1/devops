@@ -6,6 +6,11 @@ metadata:
     app: shopflow-lite
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: shopflow-lite
@@ -14,6 +19,7 @@ spec:
       labels:
         app: shopflow-lite
     spec:
+      terminationGracePeriodSeconds: 10
       imagePullSecrets:
       - name: dockerhub-pull-secret
       containers:
@@ -40,17 +46,3 @@ spec:
           limits:
             memory: "256Mi"
             cpu: "500m"
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 5000
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          failureThreshold: 3
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 5000
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          failureThreshold: 3
