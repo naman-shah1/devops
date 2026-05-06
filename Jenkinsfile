@@ -122,21 +122,21 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
-            steps {
-                container('kubectl') {
-                    sh '''
-                    echo 'Deploying ShopFlow Lite to Kubernetes...'
+    steps {
+        container('kubectl') {
+            sh '''
+            echo 'Deploying ShopFlow Lite to Kubernetes...'
 
-                    sed -i "s|image:.*|image: ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}|g" k8s/deployment.yaml
+            sed -i "s|image:.*|image: ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}|g" k8s/deployment.yaml
 
-                    kubectl apply -f k8s/deployment.yaml -n default
-                    kubectl apply -f k8s/service.yaml -n default
-                    kubectl rollout restart deployment/shopflow-lite -n default
-                    kubectl rollout status deployment/shopflow-lite -n default --timeout=300s
-                    '''
-                }
-            }
+            kubectl apply -f k8s/deployment.yaml -n default
+            kubectl apply -f k8s/service.yaml -n default
+
+            kubectl rollout status deployment/shopflow-lite -n default --timeout=300s
+            '''
         }
+    }
+}
 
         stage('Verification') {
             steps {
