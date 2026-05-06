@@ -1,33 +1,37 @@
 pipeline {
     agent {
-        kubernetes {
-            yaml '''
-            apiVersion: v1
-            kind: Pod
-            spec:
-                serviceAccountName: jenkins-deployer
-                containers:
-                - name: docker
-                  image: docker:dind
-                  securityContext:
-                    privileged: true
-                  env:
-                  - name: DOCKER_TLS_CERTDIR
-                    value: /certs
-                - name: kubectl
-                  image: bitnami/kubectl:latest
-                  command:
-                  - cat
-                  tty: true
-                - name: python
-                  image: python:3.9-slim
-                  command:
-                  - cat
-                  tty: true
-            '''
-        }
+    kubernetes {
+        yaml '''
+        apiVersion: v1
+        kind: Pod
+        spec:
+            serviceAccountName: jenkins-deployer
+            containers:
+            - name: jnlp
+              image: jenkins/inbound-agent:latest-jdk21
+              env:
+              - name: JENKINS_TUNNEL
+                value: "host.docker.internal:50000"
+            - name: docker
+              image: docker:dind
+              securityContext:
+                privileged: true
+              env:
+              - name: DOCKER_TLS_CERTDIR
+                value: /certs
+            - name: kubectl
+              image: bitnami/kubectl:latest
+              command:
+              - cat
+              tty: true
+            - name: python
+              image: python:3.9-slim
+              command:
+              - cat
+              tty: true
+        '''
     }
-
+}
     environment {
     DOCKER_IMAGE = 'shopflow-lite'
     DOCKER_TAG = "${env.BUILD_NUMBER}"
@@ -43,16 +47,9 @@ pipeline {
     stages {
       stage('Checkout Code') {
     steps {
-        checkout([
-            $class: 'GitSCM',
-            branches: [[name: '*/main']],  // change to */master if needed
-            extensions: [],
-            userRemoteConfigs: [[
-                url: 'https://github.com/naman-shah1/devops.git',
-                // add credentialsId: 'github-credentials' if repo is private
-            ]]
-        ])
+        checkout scm
     }
+}
 }
         stage('Setup Python Environment') {
             steps {
