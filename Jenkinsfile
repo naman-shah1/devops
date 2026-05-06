@@ -110,16 +110,20 @@ pipeline {
         }
 
         stage('Push Docker Image') {
-            steps {
-                container('docker') {
-                    sh '''
-                    echo "Pushing Docker images..."
-                    docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}
-                    docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest
-                    '''
-                }
+    steps {
+        container('docker') {
+            withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials',
+                             usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                sh '''
+                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}
+                docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest
+                '''
             }
         }
+    }
+        }
+
 
         stage('Deploy to Kubernetes') {
             steps {
